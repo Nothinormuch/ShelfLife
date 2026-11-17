@@ -1,0 +1,200 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+model Store {
+  id                String             @id @default(uuid()) @db.Uuid
+  name              String
+  createdAt         DateTime           @default(now()) @db.Timestamptz
+  users             User[]
+  products          Product[]
+  batches           Batch[]
+  saleRecords       SaleRecord[]
+  demandPredictions DemandPrediction[]
+  expiryRisks       ExpiryRisk[]
+  recommendations   Recommendation[]
+  modelEvaluations  ModelEvaluation[]
+
+  @@map("stores")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  storeId      String   @db.Uuid
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@map("users")
+}
+
+model Product {
+  id                  String             @id @default(uuid()) @db.Uuid
+  storeId             String             @db.Uuid
+  name                String
+  category            String
+  unit                String
+  shelfLifeDays       Int
+  defaultPurchaseCost Decimal            @db.Decimal(12, 2)
+  defaultSellingPrice Decimal            @db.Decimal(12, 2)
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now()) @db.Timestamptz
+
+  store               Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  batches             Batch[]
+  saleRecords         SaleRecord[]
+  demandPredictions   DemandPrediction[]
+  recommendations     Recommendation[]
+  modelEvaluations    ModelEvaluation[]
+
+  @@index([storeId])
+  @@index([storeId, isActive])
+  @@map("products")
+}
+
+enum BatchStatus {
+  ACTIVE
+  DEPLETED
+  EXPIRED
+}
+
+model Batch {
+  id                  String           @id @default(uuid()) @db.Uuid
+  storeId             String           @db.Uuid
+  productId           String           @db.Uuid
+  quantityReceived    Decimal          @db.Decimal(12, 2)
+  quantityRemaining   Decimal          @db.Decimal(12, 2)
+  purchaseDate        DateTime         @db.Date
+  expiryDate          DateTime         @db.Date
+  purchaseCostPerUnit Decimal          @db.Decimal(12, 2)
+  status              BatchStatus      @default(ACTIVE)
+  createdAt           DateTime         @default(now()) @db.Timestamptz
+
+  store               Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product             Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  expiryRisks         ExpiryRisk[]
+  recommendations     Recommendation[]
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([storeId, status, expiryDate])
+  @@map("batches")
+}
+
+enum SaleSource {
+  SYNTHETIC
+  MANUAL
+}
+
+model SaleRecord {
+  id           String     @id @default(uuid()) @db.Uuid
+  storeId      String     @db.Uuid
+  productId    String     @db.Uuid
+  date         DateTime   @db.Date
+  quantitySold Decimal    @db.Decimal(12, 2)
+  revenue      Decimal    @db.Decimal(12, 2)
+  source       SaleSource @default(SYNTHETIC)
+  createdAt    DateTime   @default(now()) @db.Timestamptz
+
+  store        Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([storeId, date])
+  @@map("sale_records")
+}
+
+enum PredictionHorizon {
+  NEXT_DAY
+}
+
+model DemandPrediction {
+  id                String            @id @default(uuid()) @db.Uuid
+  storeId           String            @db.Uuid
+  productId         String            @db.Uuid
+  horizon           PredictionHorizon @default(NEXT_DAY)
+  predictedQuantity Decimal           @db.Decimal(12, 2)
+  isFallback        Boolean           @default(false)
+  fallbackReason    String?
+  modelVersion      String
+  generatedAt       DateTime          @default(now()) @db.Timestamptz
+
+  store             Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product           Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([storeId, generatedAt])
+  @@map("demand_predictions")
+}
+
+model ExpiryRisk {
+  id                      String   @id @default(uuid()) @db.Uuid
+  storeId                 String   @db.Uuid
+  batchId                 String   @db.Uuid
+  predictedUnsoldQuantity Decimal  @db.Decimal(12, 2)
+  riskScore               Decimal  @db.Decimal(5, 4)
+  generatedAt             DateTime @default(now()) @db.Timestamptz
+
+  store                   Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  batch                   Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([batchId])
+  @@map("expiry_risks")
+}
+
+enum RecommendationType {
+  RESTOCK
+  DISCOUNT
+}
+
+model Recommendation {
+  id             String             @id @default(uuid()) @db.Uuid
+  storeId        String             @db.Uuid
+  type           RecommendationType
+  productId      String             @db.Uuid
+  batchId        String?            @db.Uuid
+  suggestedValue Decimal            @db.Decimal(12, 2)
+  rationale      Json
+  generatedAt    DateTime           @default(now()) @db.Timestamptz
+
+  store          Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product        Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batch          Batch?             @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([batchId])
+  @@index([storeId, type, generatedAt])
+  @@map("recommendations")
+}
+
+model ModelEvaluation {
+  id           String   @id @default(uuid()) @db.Uuid
+  storeId      String   @db.Uuid
+  productId    String?  @db.Uuid
+  modelVersion String
+  mae          Decimal  @db.Decimal(12, 4)
+  rmse         Decimal  @db.Decimal(12, 4)
+  testSetSize  Int
+  evaluatedAt  DateTime @default(now()) @db.Timestamptz
+
+  store        Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product      Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([storeId, modelVersion, evaluatedAt])
+  @@map("model_evaluations")
+}

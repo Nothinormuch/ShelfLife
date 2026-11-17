@@ -1,0 +1,46 @@
+services:
+  # Backend API Web Service
+  - type: web
+    name: shelflife-backend
+    env: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shelflife-postgres
+          property: connectionString
+      - key: ML_SERVICE_URL
+        fromService:
+          type: web
+          name: shelflife-ml-service
+          property: host
+      - key: CORS_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+  # Python / FastAPI ML Microservice
+  - type: web
+    name: shelflife-ml-service
+    env: docker
+    dockerContext: ./ml-service
+    dockerfilePath: ./ml-service/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8000
+
+databases:
+  # Render Managed PostgreSQL Instance
+  - name: shelflife-postgres
+    plan: free
+    databaseName: shelflife_db
+    user: shelflife
