@@ -89,7 +89,7 @@ export async function generateFreshRecommendations(storeId: string, typeFilter?:
           demandPrediction: predictedDemand,
         });
 
-        // AC-6: If predicted unsold quantity at expiry > 0, generate DISCOUNT recommendation
+        // If predicted unsold quantity at expiry > 0, generate markdown discount recommendation
         if (riskRes.predictedUnsoldQuantity > 0) {
           // Markdown % based on risk score and days remaining
           let discountPct = 10;

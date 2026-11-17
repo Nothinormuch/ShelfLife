@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -7,21 +7,14 @@ import {
   Sparkles,
   History,
   Trash2,
-  DollarSign,
+  IndianRupee,
   Activity,
-  Database,
   LogOut,
-  AlertCircle,
-  CheckCircle2,
-  RefreshCw,
 } from 'lucide-react';
-import { apiFetch } from '../api/client';
 
-export const Navbar: React.FC<{ onDataGenerated?: () => void }> = ({ onDataGenerated }) => {
+export const Navbar: React.FC = () => {
   const { store, user, logout } = useAuth();
   const location = useLocation();
-  const [generating, setGenerating] = useState(false);
-  const [genStatus, setGenStatus] = useState<string | null>(null);
 
   const navLinks = [
     { to: '/', label: 'Inventory & Alerts', icon: Boxes },
@@ -29,42 +22,12 @@ export const Navbar: React.FC<{ onDataGenerated?: () => void }> = ({ onDataGener
     { to: '/recommendations', label: 'Recommendations', icon: Sparkles },
     { to: '/history', label: 'History', icon: History },
     { to: '/waste', label: 'Waste Analytics', icon: Trash2 },
-    { to: '/revenue', label: 'Revenue & Margin', icon: DollarSign },
+    { to: '/revenue', label: 'Revenue & Margin', icon: IndianRupee },
     { to: '/model-performance', label: 'Model Performance', icon: Activity },
   ];
 
-  const handleGenerateData = async () => {
-    if (!confirm('Generate 180 days of realistic synthetic sales, batches, and catalog for this store?')) {
-      return;
-    }
-    setGenerating(true);
-    setGenStatus('Generating 180 days of synthetic data & training model...');
-    try {
-      const res = await apiFetch('/sales/generate', {
-        method: 'POST',
-        body: JSON.stringify({ days: 180, overwrite: true }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setGenStatus(`Generated ${data.productsCreated} products, ${data.batchesCreated} batches, ${data.salesRecordsCreated} sales!`);
-        setTimeout(() => setGenStatus(null), 5000);
-        if (onDataGenerated) onDataGenerated();
-        window.location.reload();
-      } else {
-        const err = await res.json();
-        alert(`Generation failed: ${err.message || 'Unknown error'}`);
-        setGenStatus(null);
-      }
-    } catch (e: any) {
-      alert(`Error generating data: ${e.message}`);
-      setGenStatus(null);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Store Name */}
@@ -80,31 +43,18 @@ export const Navbar: React.FC<{ onDataGenerated?: () => void }> = ({ onDataGener
             )}
           </div>
 
-          {/* Quick Actions & User Account */}
+          {/* User Account & Logout */}
           <div className="flex items-center space-x-3">
-            <button
-              onClick={handleGenerateData}
-              disabled={generating}
-              className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg text-sm font-medium transition"
-              title="Populates realistic products, batches, and 180 days of sales history"
-            >
-              {generating ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" />
-              ) : (
-                <Database className="w-4 h-4 text-emerald-600" />
-              )}
-              <span>{generating ? 'Generating...' : 'Seed Synthetic Data'}</span>
-            </button>
-
             {user && (
               <div className="flex items-center space-x-2 border-l border-slate-200 pl-3">
                 <span className="text-xs text-slate-500 hidden md:inline">{user.email}</span>
                 <button
                   onClick={logout}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md transition"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md transition flex items-center space-x-1"
                   title="Log out"
                 >
                   <LogOut className="w-4 h-4" />
+                  <span className="text-xs font-medium">Log out</span>
                 </button>
               </div>
             )}
@@ -133,13 +83,6 @@ export const Navbar: React.FC<{ onDataGenerated?: () => void }> = ({ onDataGener
           })}
         </nav>
       </div>
-
-      {genStatus && (
-        <div className="bg-emerald-600 text-white text-xs py-1.5 px-4 text-center font-medium flex items-center justify-center space-x-2 animate-fade-in">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>{genStatus}</span>
-        </div>
-      )}
     </header>
   );
 };

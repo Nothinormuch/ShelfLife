@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
 import { Recommendation } from '../api/types';
-import { History, Filter, ArrowUpRight, Percent, Calendar } from 'lucide-react';
+import { Filter, ArrowUpRight, Percent } from 'lucide-react';
 
 export const RecommendationHistoryView: React.FC = () => {
   const [items, setItems] = useState<Recommendation[]>([]);
@@ -38,7 +38,7 @@ export const RecommendationHistoryView: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Recommendation History</h1>
           <p className="text-sm text-slate-500">
-            Immutable log of all previously generated restocking and markdown recommendations.
+            Audit log of all past restocking and markdown discount recommendations.
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export const RecommendationHistoryView: React.FC = () => {
           <div className="p-12 text-center text-slate-400 text-sm">Loading recommendation logs...</div>
         ) : items.length === 0 ? (
           <div className="p-12 text-center text-slate-500 text-sm">
-            No recommendation history recorded yet. Run recommendations to populate this log.
+            No recommendation history recorded yet.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -75,7 +75,7 @@ export const RecommendationHistoryView: React.FC = () => {
                   <th className="px-4 py-3">Product</th>
                   <th className="px-4 py-3">Batch ID</th>
                   <th className="px-4 py-3">Suggested Action</th>
-                  <th className="px-4 py-3">Stored Basis</th>
+                  <th className="px-4 py-3">Decision Basis</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

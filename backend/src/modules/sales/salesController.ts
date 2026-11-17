@@ -42,7 +42,7 @@ export const generateSales = async (req: AuthenticatedRequest, res: Response, ne
 
     const result = await generateSyntheticDataForStore(storeId, days, productCount);
 
-    // FR-33: Automatically trigger evaluation run after data generation
+    // Automatically trigger evaluation run after data generation
     try {
       await triggerModelEvaluationForStore(storeId);
     } catch (evalErr) {

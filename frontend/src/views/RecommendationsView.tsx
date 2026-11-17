@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
 import { Recommendation } from '../api/types';
 import {
-  Sparkles,
   ArrowUpRight,
   Percent,
   RefreshCw,
-  Package,
   Calendar,
-  AlertCircle,
   CheckCircle,
 } from 'lucide-react';
 
@@ -59,7 +56,7 @@ export const RecommendationsView: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">AI Decision Support</h1>
           <p className="text-sm text-slate-500">
-            Hybrid ML-driven recommendations combining next-day demand with deterministic business rules.
+            Automated recommendations combining predictive demand models with inventory optimization rules.
           </p>
         </div>
         <button
@@ -98,7 +95,7 @@ export const RecommendationsView: React.FC = () => {
         </button>
       </div>
 
-      {/* Recommendations Cards / Table */}
+      {/* Recommendations Cards */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-slate-400 text-sm">Computing recommendations...</div>
@@ -110,8 +107,8 @@ export const RecommendationsView: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
               {activeTab === 'RESTOCK'
-                ? 'Current inventory across all products is sufficient to meet projected demand.'
-                : 'Projected demand will deplete existing inventory batches before their respective expiry dates.'}
+                ? 'Current stock across all products meets projected near-term demand.'
+                : 'Projected demand will deplete current batches before expiry dates.'}
             </p>
           </div>
         ) : (
@@ -121,7 +118,6 @@ export const RecommendationsView: React.FC = () => {
 
               return (
                 <div key={rec.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/60 transition">
-                  {/* Left: Target details */}
                   <div className="flex items-start space-x-3">
                     <div
                       className={`p-2.5 rounded-lg shrink-0 mt-0.5 ${
@@ -160,7 +156,6 @@ export const RecommendationsView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Right: Recommendation Value (FR-29: renders clean recommendation directly) */}
                   <div className="flex items-center md:text-right">
                     {rec.type === 'RESTOCK' ? (
                       <div className="bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl">

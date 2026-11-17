@@ -13,7 +13,7 @@ import { analyticsRoutes } from './modules/analytics/analyticsRoutes.js';
 
 const app = express();
 
-// CORS configuration driven by environment variable (C-8b)
+// CORS configuration driven by environment variable
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -34,7 +34,7 @@ app.use(
 
 app.use(express.json());
 
-// Lightweight health check endpoint with no auth required (C-8c)
+// Lightweight health check endpoint with no auth required
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });

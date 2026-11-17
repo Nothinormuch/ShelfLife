@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
-import { Trash2, DollarSign, Package, AlertCircle } from 'lucide-react';
+import { Trash2, IndianRupee } from 'lucide-react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -9,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from 'recharts';
 
 interface WasteData {
@@ -48,15 +47,15 @@ export const WasteAnalyticsView: React.FC = () => {
         </p>
       </div>
 
-      {/* Summary KPI Cards (AC-9) */}
+      {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
           <div className="flex items-center space-x-2 text-rose-600 font-semibold text-xs uppercase tracking-wider">
-            <DollarSign className="w-4 h-4" />
+            <IndianRupee className="w-4 h-4" />
             <span>Total Spoilage Financial Loss</span>
           </div>
           <div className="mt-2 text-3xl font-extrabold text-slate-900">
-            ${Number(data?.total?.wastedCost || 0).toFixed(2)}
+            ₹{Number(data?.total?.wastedCost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-slate-400 mt-1">
             Calculated as sum of remaining quantity × unit purchase cost on expired batches.
@@ -81,7 +80,7 @@ export const WasteAnalyticsView: React.FC = () => {
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
         <h3 className="text-base font-semibold text-slate-900 mb-1">Spoilage Cost by Product</h3>
         <p className="text-xs text-slate-500 mb-6">
-          Breakdown of write-off dollars across perishable grocery items.
+          Breakdown of write-off losses across perishable grocery items.
         </p>
 
         {loading ? (
@@ -109,10 +108,10 @@ export const WasteAnalyticsView: React.FC = () => {
                 />
                 <YAxis
                   tick={{ fontSize: 11, fill: '#64748b' }}
-                  tickFormatter={(val) => `$${val}`}
+                  tickFormatter={(val) => `₹${val}`}
                 />
                 <Tooltip
-                  formatter={(val: any) => [`$${Number(val).toFixed(2)}`, 'Wasted Cost']}
+                  formatter={(val: any) => [`₹${Number(val).toFixed(2)}`, 'Wasted Cost']}
                   contentStyle={{
                     backgroundColor: '#ffffff',
                     borderRadius: '8px',
@@ -122,7 +121,7 @@ export const WasteAnalyticsView: React.FC = () => {
                 />
                 <Bar
                   dataKey="wastedCost"
-                  name="Wasted Cost ($)"
+                  name="Wasted Cost (₹)"
                   fill="#f43f5e"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={36}
@@ -156,7 +155,7 @@ export const WasteAnalyticsView: React.FC = () => {
                   <td className="px-6 py-3 text-slate-600">{p.category}</td>
                   <td className="px-6 py-3 text-slate-700 font-medium">{p.wastedQuantity}</td>
                   <td className="px-6 py-3 font-bold text-rose-600">
-                    ${Number(p.wastedCost).toFixed(2)}
+                    ₹{Number(p.wastedCost).toFixed(2)}
                   </td>
                 </tr>
               ))}

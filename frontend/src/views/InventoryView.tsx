@@ -8,9 +8,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  Clock,
   Layers,
-  Sparkles,
   CheckCircle,
 } from 'lucide-react';
 
@@ -24,14 +22,14 @@ export const InventoryView: React.FC = () => {
   // Receive stock modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [quantityReceived, setQuantityReceived] = useState<number>(20);
+  const [quantityReceived, setQuantityReceived] = useState<number>(30);
   const [purchaseDate, setPurchaseDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [expiryDate, setExpiryDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() + 7);
     return d.toISOString().split('T')[0];
   });
-  const [purchaseCost, setPurchaseCost] = useState<number>(1.5);
+  const [purchaseCost, setPurchaseCost] = useState<number>(45);
   const [receiveError, setReceiveError] = useState<string | null>(null);
   const [receiveSuccess, setReceiveSuccess] = useState<string | null>(null);
 
@@ -92,7 +90,6 @@ export const InventoryView: React.FC = () => {
     setReceiveError(null);
     setReceiveSuccess(null);
 
-    // EC-8 & EC-9 client check
     if (quantityReceived <= 0 || purchaseCost <= 0) {
       setReceiveError('Quantity and cost must be strictly greater than zero.');
       return;
@@ -120,13 +117,11 @@ export const InventoryView: React.FC = () => {
       }
 
       setReceiveSuccess('Batch received successfully!');
-      // refresh batches for this product if already loaded
       const bRes = await apiFetch(`/products/${selectedProductId}/batches?pageSize=100`);
       if (bRes.ok) {
         const bData = await bRes.json();
         setProductBatches((prev) => ({ ...prev, [selectedProductId]: bData.items }));
       }
-      // refresh expiring batches
       const eRes = await apiFetch('/batches/expiring?withinDays=5');
       if (eRes.ok) {
         const eData = await eRes.json();
@@ -147,8 +142,7 @@ export const InventoryView: React.FC = () => {
     today.setUTCHours(0, 0, 0, 0);
     const exp = new Date(expiryDateStr);
     exp.setUTCHours(0, 0, 0, 0);
-    const diff = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return diff;
+    return Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   return (
@@ -158,20 +152,20 @@ export const InventoryView: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inventory Overview</h1>
           <p className="text-sm text-slate-500">
-            Real-time tracking of grocery products and individual purchase batches.
+            Real-time batch-level tracking of grocery items and expiration windows.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center space-x-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
+          className="inline-flex items-center space-x-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-xs"
         >
           <Plus className="w-4 h-4" />
           <span>Receive Stock Batch</span>
         </button>
       </div>
 
-      {/* FR-21 / AC-5: Expiring-Soon Alerts */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 shadow-sm">
+      {/* Expiring-Soon Alerts */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 shadow-xs">
         <div className="flex items-center space-x-2 text-amber-900 font-semibold mb-3">
           <AlertTriangle className="w-5 h-5 text-amber-600" />
           <span>Expiring-Soon Alerts (Within 5 Days)</span>
@@ -221,24 +215,24 @@ export const InventoryView: React.FC = () => {
         )}
       </div>
 
-      {/* FR-20: Product List with Expandable Batches */}
+      {/* Product List with Expandable Batches */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
           <h2 className="font-semibold text-slate-900 flex items-center space-x-2">
             <Package className="w-5 h-5 text-slate-500" />
-            <span>Product Catalog & Batches</span>
+            <span>Product Catalog &amp; Active Batches</span>
           </h2>
           <span className="text-xs text-slate-500">
-            Click any product to view its distinct purchase batches
+            Click any item to inspect its purchase batches and depletion schedule
           </span>
         </div>
 
         {products.length === 0 ? (
           <div className="text-center py-12 px-4">
             <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-medium text-slate-800">No products found</h3>
+            <h3 className="text-base font-medium text-slate-800">No products in inventory</h3>
             <p className="text-sm text-slate-500 mt-1">
-              Click "Seed Synthetic Data" in the top bar to generate 180 days of realistic grocery inventory and sales!
+              Run the database seed command in the console to populate realistic Indian grocery inventory and sales history.
             </p>
           </div>
         ) : (
@@ -272,7 +266,7 @@ export const InventoryView: React.FC = () => {
                           )}
                         </div>
                         <div className="text-xs text-slate-500 mt-0.5">
-                          Shelf life: {product.shelfLifeDays} days • Cost: ${Number(product.defaultPurchaseCost).toFixed(2)} • Sell: ${Number(product.defaultSellingPrice).toFixed(2)}
+                          Shelf life: {product.shelfLifeDays} days • Cost: ₹{Number(product.defaultPurchaseCost).toFixed(2)} • Sell: ₹{Number(product.defaultSellingPrice).toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -284,12 +278,12 @@ export const InventoryView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Expandable Batches Drilldown (FR-6 / AC-2) */}
+                  {/* Expandable Batches Drilldown */}
                   {isExpanded && (
                     <div className="bg-slate-50/70 border-t border-slate-100 px-6 py-4">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center space-x-1.5">
                         <Layers className="w-3.5 h-3.5" />
-                        <span>Batches for {product.name} (FIFO Depletion)</span>
+                        <span>Batches for {product.name} (FIFO Consumption)</span>
                       </h4>
 
                       {batches.length === 0 ? (
@@ -343,7 +337,7 @@ export const InventoryView: React.FC = () => {
                                       {Number(b.quantityRemaining)}
                                     </td>
                                     <td className="px-3 py-2.5 text-slate-600">
-                                      ${Number(b.purchaseCostPerUnit).toFixed(2)}
+                                      ₹{Number(b.purchaseCostPerUnit).toFixed(2)}
                                     </td>
                                     <td className="px-3 py-2.5">
                                       <span
@@ -374,13 +368,13 @@ export const InventoryView: React.FC = () => {
         )}
       </div>
 
-      {/* Receive Stock Modal (FR-9, AC-13) */}
+      {/* Receive Stock Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-scale-in">
             <h3 className="text-lg font-bold text-slate-900 mb-1">Receive New Stock Batch</h3>
             <p className="text-xs text-slate-500 mb-4">
-              Add a new physical inventory delivery for a product with purchase & expiry dates.
+              Record a new delivery batch with purchase cost and expiration date.
             </p>
 
             {receiveError && (
@@ -428,7 +422,7 @@ export const InventoryView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Cost ($)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Cost (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -476,7 +470,7 @@ export const InventoryView: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition text-sm font-semibold"
                 >
-                  Confirm & Receive
+                  Confirm &amp; Receive
                 </button>
               </div>
             </form>

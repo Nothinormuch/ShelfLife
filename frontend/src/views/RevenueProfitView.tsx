@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
-import { DollarSign, TrendingUp, PiggyBank, AlertOctagon } from 'lucide-react';
+import { TrendingUp, PiggyBank, AlertOctagon } from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -46,20 +46,20 @@ export const RevenueProfitView: React.FC = () => {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Profit &amp; Revenue Analytics</h1>
         <p className="text-sm text-slate-500">
-          Financial performance, gross margin trends, and AI-driven waste mitigation impact.
+          Financial performance, gross margin trends, and inventory waste mitigation impact.
         </p>
       </div>
 
-      {/* KPI Cards (AC-10) */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Total Revenue
           </span>
           <div className="mt-2 text-2xl font-extrabold text-slate-900">
-            ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <span className="text-xs text-slate-400 mt-1 block">From recorded sales</span>
+          <span className="text-xs text-slate-400 mt-1 block">From store sales</span>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
@@ -67,7 +67,7 @@ export const RevenueProfitView: React.FC = () => {
             Gross Margin
           </span>
           <div className="mt-2 text-2xl font-extrabold text-brand-700">
-            ${totalGrossMargin.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{totalGrossMargin.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-brand-600 font-medium mt-1 block">
             {marginPct.toFixed(1)}% margin rate
@@ -80,7 +80,7 @@ export const RevenueProfitView: React.FC = () => {
             <span>Waste Loss</span>
           </span>
           <div className="mt-2 text-2xl font-extrabold text-rose-600">
-            -${Number(data?.estimatedWasteLoss || 0).toFixed(2)}
+            -₹{Number(data?.estimatedWasteLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-slate-400 mt-1 block">Actual expired inventory cost</span>
         </div>
@@ -88,10 +88,10 @@ export const RevenueProfitView: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
           <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider flex items-center space-x-1">
             <PiggyBank className="w-3.5 h-3.5" />
-            <span>AI Potential Savings</span>
+            <span>Potential Savings</span>
           </span>
           <div className="mt-2 text-2xl font-extrabold text-emerald-700">
-            +${Number(data?.estimatedRecommendationSavings || 0).toFixed(2)}
+            +₹{Number(data?.estimatedRecommendationSavings || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-slate-400 mt-1 block">Value preserved via markdowns</span>
         </div>
@@ -104,7 +104,7 @@ export const RevenueProfitView: React.FC = () => {
           <span>Daily Revenue, Cost &amp; Gross Margin Over Time</span>
         </h3>
         <p className="text-xs text-slate-500 mb-6">
-          Daily time-series generated from synthetic transactional history.
+          Daily sales trends and margin tracking.
         </p>
 
         {loading ? (
@@ -113,7 +113,7 @@ export const RevenueProfitView: React.FC = () => {
           </div>
         ) : !data || data.series.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-slate-400 text-sm">
-            No sales recorded yet. Click "Seed Synthetic Data" above.
+            No sales recorded yet.
           </div>
         ) : (
           <div className="h-80 w-full">
@@ -142,10 +142,10 @@ export const RevenueProfitView: React.FC = () => {
                 />
                 <YAxis
                   tick={{ fontSize: 11, fill: '#64748b' }}
-                  tickFormatter={(v) => `$${v}`}
+                  tickFormatter={(v) => `₹${v}`}
                 />
                 <Tooltip
-                  formatter={(v: any) => [`$${Number(v).toFixed(2)}`]}
+                  formatter={(v: any) => [`₹${Number(v).toFixed(2)}`]}
                   contentStyle={{
                     backgroundColor: '#ffffff',
                     borderRadius: '8px',
@@ -157,7 +157,7 @@ export const RevenueProfitView: React.FC = () => {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  name="Revenue ($)"
+                  name="Revenue (₹)"
                   stroke="#16a34a"
                   fillOpacity={1}
                   fill="url(#colorRev)"
@@ -165,7 +165,7 @@ export const RevenueProfitView: React.FC = () => {
                 <Area
                   type="monotone"
                   dataKey="grossMargin"
-                  name="Gross Margin ($)"
+                  name="Gross Margin (₹)"
                   stroke="#0ea5e9"
                   fillOpacity={1}
                   fill="url(#colorMargin)"

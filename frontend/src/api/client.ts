@@ -15,7 +15,7 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
 
   let response = await fetch(url, { ...options, headers });
 
-  // EC-12: Silent token refresh on 401 token_expired
+  // Silent token refresh on 401 token_expired
   if (response.status === 401) {
     const errorClone = response.clone();
     try {

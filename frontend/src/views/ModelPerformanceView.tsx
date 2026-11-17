@@ -3,15 +3,9 @@ import { apiFetch } from '../api/client';
 import { ModelEvaluation } from '../api/types';
 import {
   Activity,
-  Award,
-  BarChart2,
-  Calendar,
-  CheckCircle2,
   Info,
-  Layers,
   Play,
   RefreshCw,
-  TrendingDown,
 } from 'lucide-react';
 
 interface LatestEvaluationResponse {
@@ -100,20 +94,20 @@ export const ModelPerformanceView: React.FC = () => {
       <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 flex items-start space-x-3 text-sky-900">
         <Info className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
-          <p className="font-semibold text-sm">Evaluation Methodology (FR-31 &amp; C-12)</p>
+          <p className="font-semibold text-sm">Evaluation Methodology</p>
           <p>
-            For each product with ≥30 days of sales history, the earliest 80% is used exclusively for training and the remaining 20% is held out as an unobserved test set (minimum 6 test points required). MAE and RMSE are computed strictly on the held-out test window.
+            For each product with at least 30 days of sales history, the earliest 80% is used for model training and the remaining 20% is held out as an unobserved test set (minimum 6 test points). MAE and RMSE are computed strictly on the held-out window to verify out-of-sample generalization.
           </p>
         </div>
       </div>
 
-      {/* Aggregate KPI Cards (AC-17) */}
+      {/* Aggregate KPI Cards */}
       {!agg || agg.testSetSize === 0 ? (
         <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500">
           <Activity className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <h3 className="text-base font-semibold text-slate-800">No Evaluation History Available</h3>
           <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
-            Products must have at least 30 days of sales history before time-based holdout evaluation can execute. Click "Seed Synthetic Data" in the top bar to generate history!
+            Products must have at least 30 days of sales history before time-based holdout evaluation can execute.
           </p>
         </div>
       ) : (
@@ -168,7 +162,7 @@ export const ModelPerformanceView: React.FC = () => {
         </div>
       )}
 
-      {/* Per-Product Breakdown Table (FR-32, AC-17) */}
+      {/* Per-Product Breakdown Table */}
       {latest && latest.byProduct.length > 0 && (
         <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200">
@@ -210,7 +204,7 @@ export const ModelPerformanceView: React.FC = () => {
         </div>
       )}
 
-      {/* Historical Evaluation Runs for Cross-Version Comparison (FR-34, AC-18) */}
+      {/* Historical Evaluation Runs */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200">
           <h3 className="font-semibold text-slate-900 text-sm">

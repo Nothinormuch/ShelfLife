@@ -32,7 +32,7 @@ export const getWasteAnalytics = async (req: AuthenticatedRequest, res: Response
       },
     });
 
-    // AC-9: sum of (quantityRemaining at time of expiry) * purchaseCostPerUnit
+    // Calculate total as sum of (quantityRemaining at time of expiry) * purchaseCostPerUnit
     const byProductMap = new Map<string, { productId: string; productName: string; category: string; wastedQuantity: number; wastedCost: number }>();
     let totalWastedQuantity = 0;
     let totalWastedCost = 0;
@@ -125,7 +125,7 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
       grossMargin: Number(d.grossMargin.toFixed(2)),
     }));
 
-    // AC-10: estimatedWasteLoss and estimatedRecommendationSavings derived from stored Batch and Recommendation data
+    // Estimated waste loss and recommendation savings derived from stored records
     const expiredBatches = await prisma.batch.findMany({
       where: { storeId, status: 'EXPIRED' },
     });

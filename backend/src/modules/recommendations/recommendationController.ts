@@ -10,10 +10,10 @@ export const getRecommendations = async (req: AuthenticatedRequest, res: Respons
     const page = Math.max(1, parseInt(req.query.page as string || '1', 10));
     const pageSize = Math.max(1, parseInt(req.query.pageSize as string || '25', 10));
 
-    // Fresh on-demand generation per FR-18 / Section 3.6
+    // Fresh on-demand recommendation generation
     await generateFreshRecommendations(storeId, type);
 
-    // EC-7: Fetch latest recommendations per (type, productId, batchId)
+    // Fetch latest recommendations per (type, productId, batchId)
     // Order by generatedAt desc, then group/deduplicate to return only current
     const whereClause: any = { storeId };
     if (type) {
@@ -89,7 +89,7 @@ export const getRecommendationHistory = async (req: AuthenticatedRequest, res: R
       if (toStr) whereClause.generatedAt.lte = new Date(toStr);
     }
 
-    // AC-8: Reads persisted history ONLY, NO recomputation
+    // Reads persisted history only, no recomputation
     const [total, items] = await Promise.all([
       prisma.recommendation.count({ where: whereClause }),
       prisma.recommendation.findMany({

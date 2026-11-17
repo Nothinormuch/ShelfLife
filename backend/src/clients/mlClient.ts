@@ -68,7 +68,7 @@ export class MLServiceError extends Error {
 async function requestML<T>(path: string, body: any): Promise<T> {
   const url = `${config.mlServiceUrl}${path}`;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout per EC-5
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
   try {
     const response = await fetch(url, {
@@ -99,7 +99,7 @@ async function requestML<T>(path: string, body: any): Promise<T> {
       throw err;
     }
 
-    // EC-5: Timeout (>5s) or unreachable network connection
+    // Timeout (>5s) or unreachable network connection
     if (err.name === 'AbortError' || err.code === 'ECONNREFUSED' || err.type === 'system') {
       throw new MLServiceError(
         'ML microservice is currently unreachable or timed out (>5s)',
@@ -119,7 +119,7 @@ async function requestML<T>(path: string, body: any): Promise<T> {
 export const mlClient = {
   async predictDemand(payload: MLDemandRequest): Promise<MLDemandResponse> {
     const res = await requestML<MLDemandResponse>('/predict/demand', payload);
-    // EC-6: validate response shape
+    // Validate response shape
     if (
       typeof res.predictedQuantity !== 'number' ||
       isNaN(res.predictedQuantity) ||
