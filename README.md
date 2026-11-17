@@ -43,10 +43,21 @@ docker compose up --build
 
 ---
 
-## CLI Seeding Command
+## Seeding Synthetic Data
 
-To populate a store with realistic Indian grocery products (Amul Taaza Milk, Fresh Paneer, Atta, Basmati Rice, Toor Dal, Tomatoes, Onions, Spices) and 180 days of daily sales:
+When deployed on Render / Vercel (or locally), you don't need shell/SSH access to seed data.
 
+### Option 1: From the Browser Console (Anywhere, including Vercel/Render)
+1. Open the ShelfLife web app in your browser and log in.
+2. Press `F12` (or right-click → Inspect) and switch to the **Console** tab.
+3. Type:
+   ```javascript
+   /seed
+   ```
+   (or `seed()`) and hit **Enter**.
+4. The console will display real-time progress (creating Indian grocery catalog, batches, 180 days of daily sales, and training holdout model evaluation) and automatically reload the dashboard!
+
+### Option 2: From the Terminal
 ```bash
 # From backend directory
 npm run seed:store -- --days 180
